@@ -4,7 +4,7 @@ class TestSuite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(256))
-    # Define relationships and additional fields as needed
+    # Relationships and additional fields
 
 class TestCase(db.Model):
     id = db.Column(db.Integer, primary_key=True)

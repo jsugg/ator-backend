@@ -1,0 +1,13 @@
+{
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.enableSyncServer": false,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.addImport.exactMatchOnly": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.autoComplete.extraPaths": [],
+    "python.languageServer": "Pylance",
+    "python.createEnvironment.contentButton": "show",
+    "pylint.importStrategy": "fromEnvironment"
+}

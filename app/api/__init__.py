@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, Response, jsonify
 from flask_jwt_extended import jwt_required
 from .test_management import test_management_routes
 from .performance_testing import performance_testing_routes
@@ -9,5 +9,5 @@ api_blueprint.register_blueprint(performance_testing_routes)
 
 @api_blueprint.route('/protected', methods=['GET'])
 @jwt_required()
-def protected():
+def protected() -> Response:
     return jsonify(message="JWT is working!")

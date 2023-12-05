@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from typing import Literal
+from flask import Blueprint, Response, request, jsonify
 from flask_jwt_extended import jwt_required
 from app import db
 from app.models.models import TestSuite, TestCase
@@ -8,7 +9,7 @@ test_management_routes = Blueprint('test_management', __name__)
 
 @test_management_routes.route('/testsuites', methods=['GET', 'POST'])
 @jwt_required()
-def test_suites():
+def test_suites() -> Response | tuple[Response, Literal[201]] | None:
     if request.method == 'GET':
         suites = TestSuite.query.all()
         return jsonify([{'id': suite.id, 'name': suite.name} for suite in suites])
@@ -23,7 +24,7 @@ def test_suites():
 
 @test_management_routes.route('/testsuites/<int:suite_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
-def test_suite(suite_id):
+def test_suite(suite_id) -> Response | tuple[Response, Literal[204]] | None:
     suite = TestSuite.query.get_or_404(suite_id)
     if request.method == 'GET':
         return jsonify({'id': suite.id, 'name': suite.name})
@@ -41,6 +42,6 @@ def test_suite(suite_id):
 
 @test_management_routes.route('/testsuites', methods=['POST'])
 @jwt_required()
-def create_test_suite():
+def create_test_suite() -> None:
     # Logic to create a test suite
     pass
