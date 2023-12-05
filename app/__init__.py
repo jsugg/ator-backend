@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -11,6 +11,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orchestrator.db'
     app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
+    app.config.from_envvar('APP_SETTINGS')
 
     db.init_app(app)
     migrate.init_app(app, db)
