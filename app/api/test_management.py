@@ -1,8 +1,9 @@
 from typing import Literal
 from flask import Blueprint, Response, request, jsonify
 from flask_jwt_extended import jwt_required
-from app import db
 from app.models.models import TestSuite, TestCase
+from app.db import db
+
 
 test_management_routes = Blueprint('test_management', __name__)
 
