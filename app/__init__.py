@@ -1,21 +1,33 @@
+import os
 from typing import Literal
 from flask import Flask, Response, jsonify
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from app.api import api_blueprint
 from app.db import db
+from app.config import ProductionConfig, DevelopmentConfig
 
 
-migrate = Migrate()
-jwt = JWTManager()
+migrate: Migrate
+jwt: JWTManager
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orchestrator.db'
-    app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
-    app.config.from_envvar('APP_SETTINGS')
+    app.config['JWT_SECRET_KEY'] = 'jwt_secret_key'
+    if (os.environ.get('FLASK_ENV') == 'production')
+        app.config.from_object(ProductionConfig)
+    elif (os.environ.get('FLASK_ENV') == 'development'):
+        app.config.from_object(DevelopmentConfig)
+    else :
+        print('FLASK_ENV not set, or not in production or development')
+        return
 
+    global migrate, jwt
+    migrate = Migrate(app, db)
+    jwt = JWTManager(app)
+    
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)

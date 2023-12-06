@@ -2,6 +2,9 @@ import subprocess
 from typing import List, Dict, Any
 from app.models.models import TestCase, TestSuite
 from app.db import db
+from prefect import Flow, Parameter, LocalDaskExecutor
+
+
 
 def execute_test_suite(test_suite_id: int) -> Dict[str, Any]:
     """
@@ -66,3 +69,19 @@ def aggregate_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
             summary["failure"] += 1
 
     return summary
+
+def define_flow() -> Flow:
+    with Flow("Test Execution Flow") as flow:
+        test_suite_id = Parameter("test_suite_id")
+        test_suite = TestSuite.query.get(test_suite_id)
+        if not test_suite:
+            raise ValueError(f"Test Suite with ID {test_suite_id} not found.")
+
+        test_case_results = execute_test_case.map([tc.id for tc in test_suite.test_cases])
+        summary = aggregate_results(test_case_results)
+
+    return flow
+
+if __name__ == "__main__":
+    flow = define_flow()
+    flow.run(executor=LocalDaskExecutor())

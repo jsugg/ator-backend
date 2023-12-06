@@ -1,0 +1,21 @@
+version: '3.10'
+services:
+  ator-backend:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      - APP_SETTINGS=config.ProductionConfig
+
+  prefect-server:
+    image: prefecthq/server:latest
+    ports:
+      - "8080:8080"
+
+  prefect-agent:
+    image: prefecthq/prefect:latest
+    depends_on:
+      - prefect-server
+    environment:
+      - PREFECT__CLOUD__AGENT__LABELS=['local']
+      - PREFECT__CLOUD__API='http://prefect-server:4200'
