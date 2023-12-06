@@ -27,6 +27,22 @@ def create_app() -> Flask:
         response = {"error": str(error)}
         return jsonify(response), 500
 
+    @app.errorhandler(405)
+    def method_not_allowed(e) -> tuple[Response, Literal[405]]:
+        return jsonify(error=str(e)), 405
+
+    @app.errorhandler(400)
+    def bad_request(e) -> tuple[Response, Literal[400]]:
+        return jsonify(error=str(e)), 400
+    
+    @app.errorhandler(401)
+    def unauthorized(e) -> tuple[Response, Literal[401]]:
+        return jsonify(error=str(e)), 401
+    
+    @app.errorhandler(403)
+    def forbidden(e) -> tuple[Response, Literal[403]]:
+        return jsonify(error=str(e)), 403
+
     @app.errorhandler(404)
     def resource_not_found(e) -> tuple[Response, Literal[404]]:
         return jsonify(error=str(e)), 404
