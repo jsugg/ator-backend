@@ -1,35 +1,60 @@
+import json
 from typing import Literal
-from flask import Blueprint, Response, jsonify, request
-from app.models.models import TestCase
+from flask import Blueprint, Response, abort, jsonify, request
+from app.models.models import PerformanceTest, PerformanceResult
+from app.services.performance_test_service import execute_performance_test
 from app.db import db
 
 performance_testing_routes = Blueprint('performance_testing', __name__)
 
 
-@performance_testing_routes.route('/testcases', methods=['GET', 'POST'])
-def test_cases() -> Response | tuple[Response, Literal[201]] | None:
+@performance_testing_routes.route('/performancetests', methods=['GET', 'POST'])
+def performance_tests() -> Response | tuple[Response, Literal[201]] | None:
     if request.method == 'GET':
-        cases = TestCase.query.all()
-        return jsonify([case.to_dict() for case in cases]), 200
+        tests = PerformanceTest.query.all()
+        return jsonify([test.to_dict() for test in tests]), 200
+
     elif request.method == 'POST':
         data = request.get_json()
-        new_case = TestCase(**data)
-        db.session.add(new_case)
+        new_test = PerformanceTest(**data)
+        db.session.add(new_test)
         db.session.commit()
-        return jsonify(new_case.to_dict()), 201
+        return jsonify(new_test.to_dict()), 201
 
 
-@performance_testing_routes.route('/testcases/<int:case_id>', methods=['GET', 'PUT', 'DELETE'])
-def test_case(case_id) -> Response | tuple[Response, Literal[204]] | None:
-    case = TestCase.query.get_or_404(case_id)
+@performance_testing_routes.route('/performancetests/<int:test_id>', methods=['GET', 'PUT', 'DELETE'])
+def performance_test(test_id) -> Response | tuple[Response, Literal[204]] | None:
+    test = PerformanceTest.query.get_or_404(test_id)
+
     if request.method == 'GET':
-        return jsonify({'id': case.id, 'name': case.name}), 200
+        return jsonify(test.to_dict()), 200
+
     elif request.method == 'PUT':
         data = request.get_json()
-        case.name = data.get('name', case.name)
+        for key, value in data.items():
+            setattr(test, key, value)
         db.session.commit()
-        return jsonify({'id': case.id, 'name': case.name}), 204
+        return jsonify(test.to_dict()), 200
+
     elif request.method == 'DELETE':
-        db.session.delete(case)
+        db.session.delete(test)
         db.session.commit()
         return jsonify({}), 204
+
+
+@performance_testing_routes.route('/performancetests/<int:test_id>/execute', methods=['POST'])
+def execute_performance(test_id) -> Response:
+    test = PerformanceTest.query.get_or_404(test_id)
+    result_data = execute_performance_test(test)
+    new_result = PerformanceResult(
+        performance_test_id=test_id, result_data=result_data)
+    db.session.add(new_result)
+    db.session.commit()
+    return jsonify(new_result.to_dict()), 201
+
+
+@performance_testing_routes.route('/performancetests/<int:test_id>/results', methods=['GET'])
+def performance_results(test_id) -> Response:
+    results = PerformanceResult.query.filter_by(
+        performance_test_id=test_id).all()
+    return jsonify([result.to_dict() for result in results]), 200

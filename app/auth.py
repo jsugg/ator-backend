@@ -1,8 +1,8 @@
 from flask import Blueprint, Response, request, url_for
 from flask_oauthlib.client import OAuth
 
-auth_blueprint = Blueprint('auth_blueprint', __name__)
-oauth = OAuth()
+auth_blueprint: Blueprint = Blueprint('auth_blueprint', __name__)
+oauth: OAuth = OAuth()
 
 keycloak = oauth.remote_app(
     'keycloak',

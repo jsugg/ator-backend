@@ -13,7 +13,7 @@ jwt: JWTManager
 
 
 def create_app() -> Flask:
-    app = Flask(__name__)
+    app: Flask = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orchestrator.db'
     app.config['JWT_SECRET_KEY'] = 'jwt_secret_key'
     if (os.environ.get('FLASK_ENV') == 'production')
@@ -36,7 +36,7 @@ def create_app() -> Flask:
 
     @app.errorhandler(Exception)
     def handle_exception(error) -> tuple[Response, Literal[500]]:
-        response = {"error": str(error)}
+        response: dict[str, str] = {"error": str(error)}
         return jsonify(response), 500
 
     @app.errorhandler(405)
