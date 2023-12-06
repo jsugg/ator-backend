@@ -1,6 +1,6 @@
 from typing import Any, Literal
-from .api_test_execution_service import ApiTestExecutionService
-from .performance_test_service import PerformanceTestService
+from .api_test_execution_service import *
+from .performance_test_service import *
 from flask_jwt_extended import get_jwt_identity
 from app.models.models import User
 
@@ -16,7 +16,6 @@ def is_user_authorized_to_execute(user_id) -> Any | Literal[False]:
         return False
     # Check user's role or permissions
     return user.is_authorized('execute_tests')
-
 
 
 def send_notification(message) -> None:

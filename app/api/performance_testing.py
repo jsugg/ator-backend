@@ -1,6 +1,5 @@
-import json
 from typing import Literal
-from flask import Blueprint, Response, abort, jsonify, request
+from flask import Blueprint, Response, jsonify, request
 from app.models.models import PerformanceTest, PerformanceResult
 from app.services.performance_test_service import execute_performance_test
 from app.db import db

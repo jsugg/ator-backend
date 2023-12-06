@@ -14,13 +14,14 @@ jwt: JWTManager
 
 def create_app() -> Flask:
     app: Flask = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orchestrator.db'
-    app.config['JWT_SECRET_KEY'] = 'jwt_secret_key'
-    if (os.environ.get('FLASK_ENV') == 'production')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:///orchestrator.db')
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'secret')
+
+    if (os.environ.get('FLASK_ENV') == 'production'):
         app.config.from_object(ProductionConfig)
     elif (os.environ.get('FLASK_ENV') == 'development'):
         app.config.from_object(DevelopmentConfig)
-    else :
+    else:
         print('FLASK_ENV not set, or not in production or development')
         return
 
