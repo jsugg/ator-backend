@@ -14,7 +14,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///orchestrator.db'
     app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
-    # app.config.from_envvar('APP_SETTINGS')
+    app.config.from_envvar('APP_SETTINGS')
 
     db.init_app(app)
     migrate.init_app(app, db)
