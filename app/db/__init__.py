@@ -1,3 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
+from app import create_app
+from app.extensions import db
 
-db = SQLAlchemy()
+app = create_app('development')
+
+with app.app_context():
+    db.create_all()

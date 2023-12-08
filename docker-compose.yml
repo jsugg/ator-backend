@@ -2,10 +2,13 @@ version: '3.10'
 services:
   ator-backend:
     build: .
+    command: python run.py
+    volumes:
+      - .:/usr/src/app
     ports:
-      - "80:80"
+      - "5000:5000"
     environment:
-      - APP_SETTINGS=config.ProductionConfig
+      FLASK_ENV: development
 
   prefect-server:
     image: prefecthq/server:latest
@@ -19,3 +22,10 @@ services:
     environment:
       - PREFECT__CLOUD__AGENT__LABELS=['local']
       - PREFECT__CLOUD__API='http://prefect-server:4200'
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: orchestrator
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password

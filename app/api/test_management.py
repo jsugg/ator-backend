@@ -1,16 +1,22 @@
-from app.api import performance_testing_routes
 from typing import Literal
 from flask import Blueprint, Response, abort, request, jsonify
 from flask_jwt_extended import jwt_required
 from app.models.models import TestSuite, TestCase, TestResult
-from app.db import db
+from app.extensions import db
 from app.services.api_test_execution_service import execute_test_suite, execute_test_case
+
 test_management_routes = Blueprint('test_management', __name__)
 
 
 @test_management_routes.route('/testsuites', methods=['GET', 'POST'])
 @jwt_required()
 def test_suites() -> Response | tuple[Response, Literal[201]] | None:
+    """
+    Retrieve or create test suites.
+
+    Returns:
+        Tuple[jsonify, int]: A JSON response with the test suites data and the HTTP status code.
+    """
     if request.method == 'GET':
         return jsonify([suite.to_dict() for suite in TestSuite.query.all()]), 200
 
@@ -21,7 +27,8 @@ def test_suites() -> Response | tuple[Response, Literal[201]] | None:
         db.session.add(new_suite)
         db.session.commit()
         return jsonify(new_suite.to_dict()), 201
-
+    
+    return None
 
 @test_management_routes.route('/testsuites/<int:suite_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()

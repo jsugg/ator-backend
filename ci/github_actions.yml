@@ -1,4 +1,4 @@
-name: Python application
+name: ator-backend CI/CD
 
 on:
   push:
@@ -12,16 +12,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.10
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.10
     - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      run: pip install -r requirements.txt
     - name: Run tests
-      run: |
-        pytest
-    - name: Trigger Prefect Flow
-      run: |
-        # Add command to trigger Prefect flow here
+      run: pytest
+#    - name: Build Docker Image
+#      run: docker build -t orchestrator .
+#    - name: Deploy to Kubernetes
+#      run: kubectl apply -f k8s.yaml
