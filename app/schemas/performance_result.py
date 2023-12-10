@@ -26,4 +26,4 @@ class PerformanceResult(PerformanceResultBase):
     executed_at: datetime
 
     class Config:
-        orm_mode: bool = True
+        from_attributes: bool = True

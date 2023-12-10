@@ -9,4 +9,4 @@ class TestRun(BaseModel):
     statuses: Dict[int, str]  # Mapping of test IDs to their statuses
 
     class Config:
-        orm_mode = True
+        from_attributes = True

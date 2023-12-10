@@ -1,6 +1,7 @@
 from typing import Tuple
 from flask import Blueprint, jsonify
 from werkzeug.exceptions import HTTPException
+from app.utils.logger import app_logger
 
 error_blueprint = Blueprint('errors', __name__)
 
@@ -15,6 +16,7 @@ def handle_http_exception(error: HTTPException) -> Tuple[jsonify, int]:
     Returns:
         Tuple[jsonify, int]: A JSON response with error details and the HTTP status code.
     """
+    app_logger.error(f"HTTPException: {error.description}, {error.code}")
     response = jsonify({'error': error.description})
     response.status_code = error.code
     return response
@@ -31,6 +33,7 @@ def handle_exception(error: Exception) -> Tuple[jsonify, int]:
     Returns:
         Tuple[jsonify, int]: A JSON response with error details and a 500 status code.
     """
+    app_logger.error(f"GeneralException: {error.description}, {error.code}")
     return jsonify({'error': str(error)}), 500
 
 

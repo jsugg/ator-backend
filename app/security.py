@@ -1,5 +1,5 @@
 from flask_security import Security, SQLAlchemyUserDatastore
-from app.db.models import User, Role
+from app.db.schema import User, Role
 from app.extensions import db
 from flask import Flask
 from typing import NoReturn
@@ -21,3 +21,4 @@ def init_security(app: Flask) -> NoReturn:
     integrating it with the Flask application.
     """
     security.init_app(app, user_datastore)
+    app_logger.info("Security features initialized")

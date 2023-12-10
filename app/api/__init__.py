@@ -6,8 +6,8 @@ from .performance_testing import performance_testing_routes
 
 
 api_blueprint: Blueprint = Blueprint('api', __name__)
-api_blueprint.register_blueprint(test_management_routes)
-api_blueprint.register_blueprint(performance_testing_routes)
+api_blueprint.register_blueprint(test_management_routes, subdomain='api', url_prefix='/api')
+api_blueprint.register_blueprint(performance_testing_routes, subdomain='api', url_prefix='/api')
 
 @api_blueprint.route('/protected', methods=['GET'])
 @jwt_required()

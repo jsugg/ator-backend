@@ -31,4 +31,4 @@ class User(UserBase):
     id: int
 
     class Config:
-        orm_mode: bool = True
+        from_attributes: bool = True

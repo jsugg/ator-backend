@@ -1,7 +1,9 @@
 import subprocess
 from typing import List, Dict, Any
-from app.models.models import TestCase, TestSuite
-from app.tasks import perform_async_test
+from app.db.schema import TestCase, TestSuite
+# from app.tasks import perform_async_test
+from app.utils.logger import service_logger
+
 
 def execute_test_suite(test_suite_id: int) -> Dict[str, Any]:
     """
@@ -15,6 +17,7 @@ def execute_test_suite(test_suite_id: int) -> Dict[str, Any]:
     """
     test_suite = TestSuite.query.get(test_suite_id)
     if not test_suite:
+        service_logger.error(f"Test Suite not found: {test_suite_id}")
         raise ValueError(f"Test Suite with ID {test_suite_id} not found.")
 
     results: Dict[str, Any] = {"test_suite_id": test_suite_id, "results": []}
@@ -22,7 +25,9 @@ def execute_test_suite(test_suite_id: int) -> Dict[str, Any]:
         result: Dict[str, Any] = execute_test_case(test_case.id)
         results["results"].append(result)
 
+    service_logger.info(f"Executed test suite: {test_suite_id}")
     return results
+
 
 def execute_test_case(test_case_id: int) -> Dict[str, Any]:
     """
@@ -36,11 +41,15 @@ def execute_test_case(test_case_id: int) -> Dict[str, Any]:
     """
     test_case = TestCase.query.get(test_case_id)
     if not test_case:
+        service_logger.error(f"Test Case not found: {test_case_id}")
         raise ValueError(f"Test Case with ID {test_case_id} not found.")
 
     collection_path: str = f'path_to_collections/{test_case.name}.json'
-    result: subprocess.CompletedProcessa = subprocess.run(["newman", "run", collection_path], capture_output=True, text=True)
+    result: subprocess.CompletedProcessa = subprocess.run(
+        ["newman", "run", collection_path], capture_output=True, text=True)
 
+    service_logger.info(
+        f"Executed test case: {test_case_id}, Status: {execution_status}")
     return {
         "test_case_id": test_case_id,
         "name": test_case.name,
@@ -68,8 +77,8 @@ def aggregate_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     return summary
 
-def execute_test_case_async(test_case_id: int):
-    perform_async_test.delay(test_case_id)
+
+# def execute_test_case_async(test_case_id: int):
+#     perform_async_test.delay(test_case_id)
 
     # To schedule tests, use Celery's periodic task feature or integrate with Flask's scheduling extensions.
-

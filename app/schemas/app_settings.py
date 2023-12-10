@@ -32,10 +32,10 @@ class PerformanceResult(PerformanceResultBase):
         executed_at (datetime): The timestamp when the test was executed.
 
     Config:
-        orm_mode (bool): Enables ORM mode for compatibility with SQLAlchemy models.
+        from_attributes (bool): Enables ORM mode for compatibility with SQLAlchemy models.
     """
     id: int
     executed_at: datetime
 
     class Config:
-        orm_mode: bool = True
+        from_attributes: bool = True

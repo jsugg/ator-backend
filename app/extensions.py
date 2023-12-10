@@ -22,13 +22,14 @@ migrate: Migrate = Migrate()
 jwt: JWTManager = JWTManager()
 
 # OAuth client
-oauth: OAuth = OAuth()
+keycloak: OAuth = OAuth()
 
 # Celery
 celery: Celery = Celery()
 
 # Swagger API
 swagger_api: Api = Api()
+
 
 def create_influxdb_client() -> InfluxDBClient:
     """
@@ -37,9 +38,15 @@ def create_influxdb_client() -> InfluxDBClient:
     Returns:
         InfluxDBClient: An instance of InfluxDBClient.
     """
-    return InfluxDBClient(
-        host='influxdb_host', port=8086, database='performance_data'
-    )
+    try:
+        influxdb = InfluxDBClient(
+            host='influxdb_host', port=8086, username='admin', password='admin'
+        )
+        return influxdb
+
+    except Exception as err:
+        app_logger.error(f"Error in creating InfluxDB client: {str(err)}")
+        raise err
 
 
 influxdb_client: InfluxDBClient = create_influxdb_client()
@@ -52,9 +59,15 @@ def create_redis_client() -> Redis:
     Returns:
         Redis: An instance of Redis client.
     """
-    return Redis(
-        host='redis_host', port=6379, db=0, decode_responses=True
-    )
+    try:
+        redis: Redis = Redis(
+            host='redis_host', port=6379, db=0, decode_responses=True
+        )
+        return redis
+
+    except Exception as err:
+        app_logger.error(f"Error in creating Redis client: {str(err)}")
+        raise err
 
 
 redis_client: Redis = create_redis_client()
@@ -70,19 +83,24 @@ def create_keycloak_oauth(app: Flask) -> OAuth:
     Returns:
         OAuth: Configured OAuth client for Keycloak.
     """
-    keycloak_oauth: OAuth = OAuth(app)
-    keycloak_oauth.remote_app(
-        'keycloak',
-        consumer_key=app.config['KEYCLOAK_CLIENT_ID'],
-        consumer_secret=app.config['KEYCLOAK_CLIENT_SECRET'],
-        request_token_params={'scope': 'openid'},
-        base_url=app.config['KEYCLOAK_URL'],
-        access_token_url='/realms/' +
-        app.config['KEYCLOAK_REALM'] + '/protocol/openid-connect/token',
-        authorize_url='/realms/' +
-        app.config['KEYCLOAK_REALM'] + '/protocol/openid-connect/auth',
-    )
-    return keycloak_oauth
+    try:
+        keycloak: OAuth = OAuth(app)
+        # app_logger.info(f"'kc_cid': {app.config['KEYCLOAK_CLIENT_ID']}, 'kc_secret': {app.config['KEYCLOAK_CLIENT_SECRET']}, 'kc_url': {app.config['KEYCLOAK_URL']}, 'kc_realm': {app.config['KEYCLOAK_REALM']}")
+        keycloak.remote_app(
+            'keycloak',
+            consumer_key=app.config['KEYCLOAK_CLIENT_ID'],
+            consumer_secret=app.config['KEYCLOAK_CLIENT_SECRET'],
+            request_token_params={'scope': 'openid'},
+            base_url=app.config['KEYCLOAK_URL'],
+            access_token_url='/realms/' +
+            app.config['KEYCLOAK_REALM'] + '/protocol/openid-connect/token',
+            authorize_url='/realms/' +
+            app.config['KEYCLOAK_REALM'] + '/protocol/openid-connect/auth',
+        )
+
+    except Exception as err:
+        app_logger.error(f"Error in creating Keycloak OAuth: {str(err)}")
+        raise err
 
 
 def create_celery(app: Flask) -> Celery:
@@ -95,25 +113,46 @@ def create_celery(app: Flask) -> Celery:
     Returns:
         Celery: A Celery instance.
     """
-    celery: Celery = Celery(
-        app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
-    )
+    try:
+        celery = Celery(
+            app.import_name,
+            backend=app.config['CELERY_RESULT_BACKEND'],
+            broker=app.config['CELERY_BROKER_URL']
+        )
 
-    celery.conf.update(app.config)
-    return celery
+        celery.conf.update(app.config)
+        return celery
+
+    except Exception as err:
+        app_logger.error(f"Error in creating Celery: {str(err)}")
+        raise err
 
 
 def create_swagger(app: Flask) -> Api:
-    SWAGGER_URL: str = app.config['SWAGGER_URL']
-    SWAGGER_API_URL: str = app.config['SWAGGER_API_URL']
-    swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, SWAGGER_API_URL)
-    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
-    swagger_api = Api(app, title='API', version='1.0',
-                      description='API documentation using Swagger', doc=SWAGGER_URL)
-    swagger_api.add_namespace(swaggerui_blueprint, path='/api')
+    """
+    Create and return a Swagger API instance.
+
+    Args:
+        app (Flask): The Flask application instance to be used.
+
+    Returns:
+        Api: A Swagger API instance.
+    """
+    try:
+        SWAGGER_URL: str = app.config['SWAGGER_URL']
+        SWAGGER_API_URL: str = app.config['SWAGGER_API_URL']
+        swaggerui_blueprint = get_swaggerui_blueprint(
+            SWAGGER_URL, SWAGGER_API_URL)
+        app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+        swagger_api = Api(app, title='API', version='1.0',
+                          description='API documentation using Swagger', doc=SWAGGER_URL)
+        app_logger.info("Swagger created successfully.")
+
+    except Exception as err:
+        app_logger.error(f"Error in creating Swagger: {str(err)}")
+        raise err
     return swagger_api
+
 
 def init_app(app: Flask) -> NoReturn:
     """
@@ -125,9 +164,11 @@ def init_app(app: Flask) -> NoReturn:
     try:
         app_logger.info("Initializing Flask extensions...")
         db.init_app(app)
+        with app.app_context():
+            db.create_all()
         migrate.init_app(app, db)
         jwt.init_app(app)
-        oauth.init_app(app)
+        create_keycloak_oauth(app)
         create_swagger(app)
         app_logger.info("Flask extensions initialized successfully.")
     except Exception as err:

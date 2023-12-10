@@ -20,9 +20,9 @@ def create_app(config_name: str) -> Flask:
     app.config.from_object(config_by_name[config_name])
 
     try:
-        app.register_blueprint(api_blueprint, url_prefix='/api')
-        app.register_blueprint(auth_blueprint)
-        app.register_blueprint(error_blueprint)
+        # app.register_blueprint(api_blueprint, url_prefix='/api', subdomain='api')
+        app.register_blueprint(auth_blueprint, url_prefix='/auth', subdomain='auth')
+        app.register_blueprint(error_blueprint, url_prefix='/error', subdomain='error')
         init_app(app)
         app_logger.info(f"App created with {config_name} configuration.")
     except Exception as err:

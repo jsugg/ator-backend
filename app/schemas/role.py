@@ -24,9 +24,9 @@ class Role(RoleBase):
         id (int): The unique identifier for the role.
 
     Config:
-        orm_mode (bool): Enables ORM mode for compatibility with SQLAlchemy models.
+        from_attributes (bool): Enables ORM mode for compatibility with SQLAlchemy models.
     """
     id: int
 
     class Config:
-        orm_mode: bool = True
+        from_attributes: bool = True
