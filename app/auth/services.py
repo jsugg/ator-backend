@@ -2,6 +2,7 @@ from typing import Optional
 from app.db.models import User
 from app.extensions import db
 from werkzeug.security import check_password_hash
+from app.utils.logger import auth_logger
 
 class AuthService:
     """Service class for user authentication and authorization."""
@@ -18,10 +19,16 @@ class AuthService:
         Returns:
             Optional[User]: The authenticated user or None if authentication fails.
         """
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password_hash, password):
-            return user
-        return None
+        try:
+            user = User.query.filter_by(username=username).first()
+            if user and check_password_hash(user.password_hash, password):
+                auth_logger.info(f"User {username} authenticated successfully.")
+                return user
+            auth_logger.warning(f"Authentication failed for user {username}.")
+            return None
+        except Exception as e:
+            auth_logger.error(f"Error during authentication for user {username}: {str(e)}")
+            return None
 
     @staticmethod
     def authorize_user(user: User, permission: str) -> bool:
@@ -36,5 +43,10 @@ class AuthService:
             bool: True if the user is authorized, False otherwise.
         """
         # Implement permission checking logic here
-        # For example, check if the user's role has the required permission
-        return True  # Placeholder return
+        try:
+            # Placeholder for actual authorization logic
+            auth_logger.info(f"Authorizing user {user.username} for permission {permission}.")
+            return True  # Placeholder return
+        except Exception as e:
+            auth_logger.error(f"Authorization error for user {user.username}: {str(e)}")
+            return False

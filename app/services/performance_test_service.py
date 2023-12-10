@@ -7,21 +7,16 @@ import time
 from typing import Any, Dict, List, Optional
 from flask import current_app
 from app.schemas.performance_test import PerformanceTest
-from app.models import TestRun
+from app.schemas.test_run import TestRun
 from sqlalchemy.orm import Session
 from datetime import datetime
 
 
 class LocustPerformanceTester:
-    def __init__(self, db_session: Session):
+    def __init__(self, db_session: Session) -> None:
         self.db_session = db_session
 
-
-class LocustPerformanceTester:
-    def __init__(self, db_session: Session):
-        self.db_session = db_session
-
-    def execute_test(self, performance_test_id: int, test_run_id: str) -> Dict[str, Any]:
+    def execute_test(self, performance_test_id: int = None, test_run_id: str = None) -> Dict[str, Any]:
         test = self._get_test(performance_test_id)
         if not test:
             return {"status": "Error", "message": "Test not found"}
@@ -105,7 +100,7 @@ class LocustPerformanceTester:
         self.db_session.commit()
 
     def schedule_test_execution(self, test_id: int, test_run_id: str, delay: int) -> None:
-        def delayed_execution():
+        def delayed_execution() -> None:
             time.sleep(delay)
             self.execute_test(test_id, test_run_id)
 

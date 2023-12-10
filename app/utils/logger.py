@@ -1,8 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
-import os
 
-def setup_logger(name, log_file, level=logging.INFO):
+def setup_logger(name: str, log_file: str, level=logging.INFO) -> logging.Logger:
     """
     Sets up a logger with a rotating file handler.
 
@@ -15,16 +14,21 @@ def setup_logger(name, log_file, level=logging.INFO):
         logging.Logger: Configured logger instance.
     """
 
-    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+    formatter: logging.Formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
     
-    handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=3)
+    handler: RotatingFileHandler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=3)
     handler.setFormatter(formatter)
 
-    logger = logging.getLogger(name)
+    logger: logging.Logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
 
     return logger
 
-# Example usage: Creating a logger for the authentication module
-auth_logger = setup_logger('auth', 'logs/auth.log')
+
+# Creating loggers for different modules
+app_logger: logging.Logger = setup_logger('app_logger', 'logs/app.log')
+auth_logger: logging.Logger = setup_logger('auth', 'logs/auth.log')
+api_logger: logging.Logger = setup_logger('api', 'logs/api.log')
+db_logger: logging.Logger = setup_logger('db', 'logs/db.log')
+service_logger: logging.Logger = setup_logger('service', 'logs/service.log')

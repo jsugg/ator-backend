@@ -6,4 +6,4 @@ from flask import Blueprint
 from . import routes
 
 # Create a Blueprint for the authentication module
-auth = Blueprint('auth', __name__)
+auth_blueprint = Blueprint('auth', __name__)

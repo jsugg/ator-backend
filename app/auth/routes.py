@@ -1,3 +1,4 @@
+from typing import Any, Literal
 from flask_restx import Namespace, Resource, fields
 from flask import jsonify, request, session, redirect, url_for
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -35,15 +36,15 @@ class Login(Resource):
     @auth_ns.doc('login')
     @auth_ns.response(302, 'Redirect to authentication page', login_response_model)
     @auth_ns.response(401, 'Unauthorized', error_model)
-    def get(self):
+    def get(self) -> Any | tuple[dict[str, str], Literal[500]]:
             """User login endpoint. Redirects to Keycloak login page."""
             try:
                 callback_url = url_for('.authorized', _external=True)
                 response = keycloak.authorize(callback=callback_url)
-                auth_logger.info("Login initiated.")
+                auth_logger.info("User login attempted.")
                 return response
             except Exception as e:
-                auth_logger.error(f"Login error: {str(e)}")
+                auth_logger.error(f"Login failed: {str(e)}")
                 return {'message': 'Internal server error'}, 500
 
 
